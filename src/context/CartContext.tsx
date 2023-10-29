@@ -1,22 +1,32 @@
 import { ReactNode, useCallback, useState } from 'react'
 import { createContext } from 'use-context-selector'
-
+import {
+    useShoppingCart
+} from 'use-shopping-cart'
 export interface ProductProps {
     id: string
     name: string
     imageUrl: string
-    price: string
+    price: number
     numberPrice: number
     description: string
     defaultPriceId: string
+    sku: string
+    currency: string
+    formattedPrice: string
+    formattedValue: string
+    price_data: any
+    product_data: any
+    quantity: number
+    value: number
+
 }
 
 interface CartContextData {
-    cartItems: ProductProps[]
+    arrayDeObjetos: ProductProps[]
     cartTotal: number
     addToCart: (product: ProductProps) => void
     removeCartItem: (productId: string) => void
-    checkIfItemAlreadyExists: (productId: string) => boolean
 }
 
 
@@ -28,49 +38,39 @@ interface CartContextProviderProps {
 export const CartContext = createContext({} as CartContextData)
 
 export const CartContextProvider = ({ children }: CartContextProviderProps) => {
-    const [cartItems, setCartItems] = useState<ProductProps[]>([])
-    console.log("cartItems", cartItems)
-    const cartTotal = cartItems.reduce(
+    const { addItem, removeItem, cartDetails, clearCart } = useShoppingCart()
+
+    const arrayDeObjetos = Object.values(cartDetails).map(item => item);
+
+
+    const cartTotal = arrayDeObjetos.reduce(
         (total, prod) => (total += prod.numberPrice),
         0,
     )
 
-    const checkIfItemAlreadyExists = useCallback(
-        (productId: string) => cartItems.some((prod) => prod.id === productId),
-        [cartItems],
-    )
+
 
     const addToCart = useCallback(
         (product: ProductProps) => {
-
-            const hasItemInCart = checkIfItemAlreadyExists(product.id)
-            if (!hasItemInCart) {
-                setCartItems((prev) => [...prev, product])
-            }
+            addItem(product)
         },
-        [checkIfItemAlreadyExists],
+        [],
     )
 
     const removeCartItem = useCallback(
         (productId: string) => {
-            const hasItemInCart = checkIfItemAlreadyExists(productId)
-
-            if (hasItemInCart) {
-                setCartItems((prev) => prev.filter(item => item.id !== productId))
-            }
-
+            removeItem(productId)
         },
-        [checkIfItemAlreadyExists],
+        [],
     )
 
     return (
         <CartContext.Provider
             value={{
-                cartItems,
+                arrayDeObjetos,
                 cartTotal,
                 addToCart,
                 removeCartItem,
-                checkIfItemAlreadyExists,
             }}
         >
             {children}

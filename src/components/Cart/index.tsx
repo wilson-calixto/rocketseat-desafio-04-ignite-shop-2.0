@@ -21,8 +21,9 @@ export const Cart = () => {
   const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
     useState(false)
 
-  const { cartItems, cartTotal, removeCartItem } = useCart()
-  const cartQuantity = cartItems.length
+  const { arrayDeObjetos, cartTotal, removeCartItem } = useCart()
+  console.log('cartTotal', cartTotal)
+  const cartQuantity = arrayDeObjetos.length
   const quantityText = `${cartQuantity} ${cartQuantity <= 1 ? 'item' : 'itens'}`
   const isDisabled = !cartQuantity || isCreatingCheckoutSession
   const optionButtonText = !cartQuantity
@@ -38,9 +39,8 @@ export const Cart = () => {
   const handleCheckout = async () => {
     try {
       setIsCreatingCheckoutSession(true)
-      console.log('setIsCreatingCheckoutSession', cartItems)
       const response = await axios.post('/api/checkout', {
-        products: cartItems,
+        products: arrayDeObjetos,
       })
 
       const { checkoutUrl } = response.data
@@ -50,6 +50,8 @@ export const Cart = () => {
       alert('Falha ao redirecionar ao checkout!')
     }
   }
+  console.log('mapa', arrayDeObjetos)
+
 
   return (
     <Dialog.Root>
@@ -69,7 +71,7 @@ export const Cart = () => {
             {!cartQuantity ? (
               <p>Parece que seu carrinho está vazio :(</p>
             ) : (
-              cartItems.map((item) => (
+              arrayDeObjetos.map((item) => (
                 <CartProduct key={item.id}>
                   <CartProductImage>
                     <Image width={95} height={95} alt="" src={item.imageUrl} />

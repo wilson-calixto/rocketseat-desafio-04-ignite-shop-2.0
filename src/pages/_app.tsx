@@ -6,20 +6,27 @@ import { Container, Header } from "../styles/pages/app"
 
 import Image from "next/future/image"
 import { CartContextProvider } from "../context/CartContext"
+import { CartProvider } from 'use-shopping-cart'
 
 globalStyles()
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <CartContextProvider>
-      <Container>
-        <Header>
-          <Image src={logoImg} alt="" />
-        </Header>
-        <Component {...pageProps} />
-      </Container>
-    </CartContextProvider>
-
+    <CartProvider
+      mode="payment"
+      cartMode="checkout-session"
+      stripe={process.env.STRIPE_SECRET_KEY}
+      currency="USD"
+    >
+      <CartContextProvider>
+        <Container>
+          <Header>
+            <Image src={logoImg} alt="" />
+          </Header>
+          <Component {...pageProps} />
+        </Container>
+      </CartContextProvider>
+    </CartProvider>
   )
 }
 

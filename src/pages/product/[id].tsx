@@ -94,7 +94,15 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ para
           currency: 'BRL'
         }).format(price.unit_amount / 100),
         description: product.description,
-        defaultPriceId: price.id
+        defaultPriceId: price.id,
+        sku: 'sku1',
+        currency: price.currency,
+        formattedPrice: price.transform_quantity,
+        formattedValue: price.transform_quantity,
+        price_data: {},
+        product_data: {},
+        quantity: 1,
+        value: price,
       }
     },
     revalidate: 60 * 60 * 1 // 1 hours
