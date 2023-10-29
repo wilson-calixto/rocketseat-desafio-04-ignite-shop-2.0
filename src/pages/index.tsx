@@ -10,6 +10,11 @@ import { HomeContainer, Product } from "../styles/pages/home"
 
 import 'keen-slider/keen-slider.min.css'
 import Stripe from "stripe"
+import { Cart } from "../components/Cart"
+import { useRouter } from "next/router"
+import { CartButton } from "../components/CartButton"
+import { useCart } from "../components/hooks/useCart"
+import { MouseEvent, useCallback } from "react"
 
 interface HomeProps {
   products: {
@@ -27,13 +32,28 @@ export default function Home({ products }: HomeProps) {
       spacing: 48
     }
   });
+  const { pathname } = useRouter()
 
+  const showCart = pathname !== '/success'
+
+
+  const { addToCart, checkIfItemAlreadyExists } = useCart()
+
+
+  const handleAddToCart = useCallback(
+    (event: MouseEvent<HTMLButtonElement>, product: any) => {
+      event.preventDefault()
+      addToCart(product)
+    },
+    [addToCart],
+  )
   return (
     <>
       <Head>
         <title>Home | Ignite Shop</title>
       </Head>
 
+      {showCart && <Cart />}
       <HomeContainer ref={sliderRef} className="keen-slider">
         {products.map(product => {
           return (
@@ -44,6 +64,15 @@ export default function Home({ products }: HomeProps) {
                 <footer>
                   <strong>{product.name}</strong>
                   <span>{product.price}</span>
+
+                  <CartButton
+                    color="green"
+                    size="large"
+                    type="button"
+                    disabled={(product.id) && null}
+                    onClick={(evt) => handleAddToCart(evt, product)}
+
+                  />
                 </footer>
               </Product>
             </Link>
@@ -62,6 +91,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const products = response.data.map(product => {
     const price = product.default_price as Stripe.Price;
+    const unitAmount = (price.unit_amount ?? 0) / 100
 
     return {
       id: product.id,
@@ -71,6 +101,9 @@ export const getStaticProps: GetStaticProps = async () => {
         style: 'currency',
         currency: 'BRL'
       }).format(price.unit_amount / 100),
+      numberPrice: unitAmount,
+      description: product.description,
+      defaultPriceId: price.id,
     }
   })
 
