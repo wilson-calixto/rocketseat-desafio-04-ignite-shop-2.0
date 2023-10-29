@@ -13,9 +13,10 @@ import Stripe from "stripe"
 import { Cart } from "../components/Cart"
 import { useRouter } from "next/router"
 import { CartButton } from "../components/CartButton"
-import { useCart } from "../components/hooks/useCart"
 import { MouseEvent, useCallback } from "react"
-
+import {
+  useShoppingCart
+} from 'use-shopping-cart'
 interface HomeProps {
   products: {
     id: string
@@ -37,15 +38,15 @@ export default function Home({ products }: HomeProps) {
   const showCart = pathname !== '/success'
 
 
-  const { addToCart, checkIfItemAlreadyExists } = useCart()
+  const { addItem } = useShoppingCart()
 
 
   const handleAddToCart = useCallback(
     (event: MouseEvent<HTMLButtonElement>, product: any) => {
       event.preventDefault()
-      addToCart(product)
+      addItem(product)
     },
-    [addToCart],
+    [addItem],
   )
   return (
     <>

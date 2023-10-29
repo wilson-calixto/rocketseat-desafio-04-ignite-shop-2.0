@@ -1,5 +1,3 @@
-// import { useCart } from '@/hooks/useCart'
-
 import * as Dialog from '@radix-ui/react-dialog'
 import axios from 'axios'
 import Image from 'next/image'
@@ -15,14 +13,24 @@ import {
   FinalizationDetails,
 } from './styles'
 import { formattedPrice } from '../../utils/formattedPrice'
-import { useCart } from '../hooks/useCart'
-
+import {
+  useShoppingCart
+} from 'use-shopping-cart'
+import { ProductProps } from '../../utils/interfaces'
 export const Cart = () => {
   const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
     useState(false)
 
-  const { arrayDeObjetos, cartTotal, removeCartItem } = useCart()
-  console.log('cartTotal', cartTotal)
+  const { removeItem, cartDetails, clearCart } = useShoppingCart()
+
+  const arrayDeObjetos = Object.values(cartDetails).map(item => item as ProductProps);
+
+
+  const cartTotal = arrayDeObjetos.reduce(
+    (total, prod) => (total += prod.numberPrice),
+    0,
+  )
+
   const cartQuantity = arrayDeObjetos.length
   const quantityText = `${cartQuantity} ${cartQuantity <= 1 ? 'item' : 'itens'}`
   const isDisabled = !cartQuantity || isCreatingCheckoutSession
@@ -32,8 +40,8 @@ export const Cart = () => {
   const buttonCheckoutText = isDisabled ? optionButtonText : 'Finalizar compra'
 
   const handleRemove = useCallback(
-    (id: string) => removeCartItem(id),
-    [removeCartItem],
+    (id: string) => removeItem(id),
+    [removeItem],
   )
 
   const handleCheckout = async () => {
@@ -50,7 +58,6 @@ export const Cart = () => {
       alert('Falha ao redirecionar ao checkout!')
     }
   }
-  console.log('mapa', arrayDeObjetos)
 
 
   return (
