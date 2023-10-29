@@ -21,17 +21,17 @@ export const Cart = () => {
   const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
     useState(false)
 
-  const { removeItem, cartDetails, clearCart } = useShoppingCart()
+  const { removeItem, cartDetails, clearCart, redirectToCheckout, cartCount } = useShoppingCart()
 
-  const arrayDeObjetos = Object.values(cartDetails).map(item => item as ProductProps);
+  const cartItems = Object.values(cartDetails).map(item => item as ProductProps);
 
 
-  const cartTotal = arrayDeObjetos.reduce(
+  const cartTotal = cartItems.reduce(
     (total, prod) => (total += prod.numberPrice),
     0,
   )
 
-  const cartQuantity = arrayDeObjetos.length
+  const cartQuantity = cartItems.length
   const quantityText = `${cartQuantity} ${cartQuantity <= 1 ? 'item' : 'itens'}`
   const isDisabled = !cartQuantity || isCreatingCheckoutSession
   const optionButtonText = !cartQuantity
@@ -45,17 +45,22 @@ export const Cart = () => {
   )
 
   const handleCheckout = async () => {
-    try {
-      setIsCreatingCheckoutSession(true)
-      const response = await axios.post('/api/checkout', {
-        products: arrayDeObjetos,
-      })
+    if (cartCount > 0) {
+      try {
+        setIsCreatingCheckoutSession(true)
+        const response = await redirectToCheckout()
+        if (response?.error) {
+          console.error(response)
+        } else {
+          clearCart()
+          const { checkoutUrl } = response.data
+          window.location.href = checkoutUrl
+        }
 
-      const { checkoutUrl } = response.data
-      window.location.href = checkoutUrl
-    } catch (error) {
-      setIsCreatingCheckoutSession(false)
-      alert('Falha ao redirecionar ao checkout!')
+      } catch (error) {
+        setIsCreatingCheckoutSession(false)
+        alert('Falha ao redirecionar ao checkout!')
+      }
     }
   }
 
@@ -78,7 +83,7 @@ export const Cart = () => {
             {!cartQuantity ? (
               <p>Parece que seu carrinho está vazio :(</p>
             ) : (
-              arrayDeObjetos.map((item) => (
+              cartItems.map((item) => (
                 <CartProduct key={item.id}>
                   <CartProductImage>
                     <Image width={95} height={95} alt="" src={item.imageUrl} />
