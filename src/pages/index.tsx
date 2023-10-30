@@ -10,8 +10,6 @@ import { HomeContainer, Product } from "../styles/pages/home"
 
 import 'keen-slider/keen-slider.min.css'
 import Stripe from "stripe"
-import { Cart } from "../components/Cart"
-import { useRouter } from "next/router"
 import { CartButton } from "../components/CartButton"
 import { MouseEvent, useCallback } from "react"
 import {
@@ -33,9 +31,7 @@ export default function Home({ products }: HomeProps) {
       spacing: 48
     }
   });
-  const { pathname } = useRouter()
 
-  const showCart = pathname !== '/success'
 
 
   const { addItem } = useShoppingCart()
@@ -54,7 +50,6 @@ export default function Home({ products }: HomeProps) {
         <title>Home | Ignite Shop</title>
       </Head>
 
-      {showCart && <Cart />}
       <HomeContainer ref={sliderRef} className="keen-slider">
         {products.map(product => {
           return (
@@ -68,11 +63,11 @@ export default function Home({ products }: HomeProps) {
 
                   <CartButton
                     color="green"
-                    size="large"
+                    size="medium"
                     type="button"
                     disabled={(product.id) && null}
                     onClick={(evt) => handleAddToCart(evt, product)}
-
+                    style={{ marginLeft: '0.5rem' }}
                   />
                 </footer>
               </Product>
